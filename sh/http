@@ -1,0 +1,5 @@
+#!/bin/bash
+killall -q webfsd
+echo 'Open http://localhost:8080/'
+webfsd -F -l - -p 8080 -r . -f index.html
+
