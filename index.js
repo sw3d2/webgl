@@ -1,4 +1,5 @@
 import * as THREE from './libs/three.module.js';
+import * as sboxes from './sboxes.js';
 
 var camera, scene, renderer, group;
 
@@ -16,7 +17,7 @@ function init() {
   camera.position.z = 500;
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff);
+  scene.background = new THREE.Color(0x000000);
   scene.fog = new THREE.Fog(0xffffff, 1, 10000);
 
   var geometry = new THREE.BoxBufferGeometry(100, 100, 100);
@@ -24,12 +25,12 @@ function init() {
 
   group = new THREE.Group();
 
-  for (var i = 0; i < 1000; i++) {
+  for (let sb of sboxes.get()) {
 
     var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.x = Math.random() * 2000 - 1000;
-    mesh.position.y = Math.random() * 2000 - 1000;
-    mesh.position.z = Math.random() * 2000 - 1000;
+    mesh.position.x = sb.pos.x;
+    mesh.position.y = sb.pos.y;
+    mesh.position.z = sb.pos.z;
 
     mesh.rotation.x = Math.random() * 2 * Math.PI;
     mesh.rotation.y = Math.random() * 2 * Math.PI;
