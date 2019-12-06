@@ -1,15 +1,25 @@
+import tmap from './tmap.js';
+
+const HEIGHT_STEP = 50;
+
+console.log('treemap:', tmap);
+
 export function get() {
   let res = [];
-
-  for (let i = 0; i < 1000; i++) {
-    let x = Math.random() * 2000 - 1000;
-    let y = Math.random() * 2000 - 1000;
-    let z = Math.random() * 2000 - 1000;
-
-    res.push({
-      pos: { x, y, z },
-    });
-  }
-
+  flatten(tmap, res, 0);
+  console.log('boxlist:', res);
   return res;
+}
+
+function flatten(treemap, boxlist, depth) {
+  let { x0, x1, y0, y1 } = treemap;
+
+  boxlist.push({
+    x: { min: x0, max: x1 },
+    y: { min: y0, max: y1 },
+    z: { min: HEIGHT_STEP * depth, max: HEIGHT_STEP * (depth + 1) },
+  });
+
+  for (let subnode of treemap.children || [])
+    flatten(subnode, boxlist, depth + 1);
 }

@@ -1,12 +1,12 @@
 import * as THREE from './libs/three.module.js';
 import * as sboxes from './sboxes.js';
 
-var camera, scene, renderer, group;
+let camera, scene, renderer, group;
 
-var mouseX = 0, mouseY = 0;
+let mouseX = 0, mouseY = 0;
 
-var windowHalfX = window.innerWidth / 2;
-var windowHalfY = window.innerHeight / 2;
+let windowHalfX = window.innerWidth / 2;
+let windowHalfY = window.innerHeight / 2;
 
 init();
 animate();
@@ -20,20 +20,21 @@ function init() {
   scene.background = new THREE.Color(0x000000);
   scene.fog = new THREE.Fog(0xffffff, 1, 10000);
 
-  var geometry = new THREE.BoxBufferGeometry(100, 100, 100);
-  var material = new THREE.MeshNormalMaterial();
+  let material = new THREE.MeshNormalMaterial();
 
   group = new THREE.Group();
 
   for (let sb of sboxes.get()) {
+    let geometry = new THREE.BoxBufferGeometry(
+      sb.x.max - sb.x.min,
+      sb.y.max - sb.y.min,
+      sb.z.max - sb.z.min);
 
-    var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.x = sb.pos.x;
-    mesh.position.y = sb.pos.y;
-    mesh.position.z = sb.pos.z;
+    let mesh = new THREE.Mesh(geometry, material);
 
-    mesh.rotation.x = Math.random() * 2 * Math.PI;
-    mesh.rotation.y = Math.random() * 2 * Math.PI;
+    mesh.position.x = (sb.x.max + sb.x.min) / 2;
+    mesh.position.y = (sb.y.max + sb.y.min) / 2;
+    mesh.position.z = (sb.z.max + sb.z.min) / 2;
 
     mesh.matrixAutoUpdate = false;
     mesh.updateMatrix();
@@ -92,9 +93,9 @@ function animate() {
 
 function render() {
 
-  var time = Date.now() * 0.001;
+  let time = Date.now() * 0.001;
 
-  var rx = Math.sin(time * 0.7) * 0.5,
+  let rx = Math.sin(time * 0.7) * 0.5,
     ry = Math.sin(time * 0.3) * 0.5,
     rz = Math.sin(time * 0.2) * 0.5;
 
