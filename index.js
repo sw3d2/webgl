@@ -1,17 +1,18 @@
 import * as THREE from './libs/three.module.js';
-import * as sboxes from './sboxes.js';
+
+const TM3D_URL = './tm3d.json';
 
 let camera, scene, renderer, group;
-
 let mouseX = 0, mouseY = 0;
-
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 
-init();
-animate();
+init().then(animate);
 
-function init() {
+async function init() {
+  let resp = await fetch(TM3D_URL);
+  let tm3d = await resp.json();
+  console.log('tm3d:', tm3d);
 
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.z = 500;
@@ -24,17 +25,17 @@ function init() {
 
   group = new THREE.Group();
 
-  for (let sb of sboxes.get()) {
+  for (let sb of tm3d) {
     let geometry = new THREE.BoxBufferGeometry(
-      sb.x.max - sb.x.min,
-      sb.y.max - sb.y.min,
-      sb.z.max - sb.z.min);
+      sb.x[1] - sb.x[0],
+      sb.y[1] - sb.y[0],
+      sb.z[1] - sb.z[0]);
 
     let mesh = new THREE.Mesh(geometry, material);
 
-    mesh.position.x = (sb.x.max + sb.x.min) / 2;
-    mesh.position.y = (sb.y.max + sb.y.min) / 2;
-    mesh.position.z = (sb.z.max + sb.z.min) / 2;
+    mesh.position.x = (sb.x[1] + sb.x[0]) / 2;
+    mesh.position.y = (sb.y[1] + sb.y[0]) / 2;
+    mesh.position.z = (sb.z[1] + sb.z[0]) / 2;
 
     mesh.matrixAutoUpdate = false;
     mesh.updateMatrix();
