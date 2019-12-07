@@ -1,6 +1,6 @@
 import * as THREE from './libs/three.module.js';
 
-const TM3D_URL = './tm3d.json';
+const TM3D_URL = '/.json/tm3d.json';
 
 let camera, scene, renderer, group;
 let mouseX = 0, mouseY = 0;
@@ -12,7 +12,6 @@ init().then(render);
 async function init() {
   let resp = await fetch(TM3D_URL);
   let tm3d = await resp.json();
-  console.log('tm3d:', tm3d);
 
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.z = 500;
