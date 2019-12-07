@@ -1,6 +1,6 @@
 import * as THREE from './libs/three.module.js';
 
-const TM3D_URL = '/.json/tm3d.json';
+const TM3D_URL = '/json/tm3d.json';
 
 let rendering = false;
 let camera, scene, renderer, group;

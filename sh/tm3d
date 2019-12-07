@@ -1,8 +1,8 @@
 #!/bin/bash
 
-VAST=$(realpath .json/vast.json);
-TMAP=$(realpath .json/tmap.json);
-TM3D=$(realpath .json/tm3d.json);
+VAST=$(realpath json/vast.json);
+TMAP=$(realpath json/tmap.json);
+TM3D=$(realpath json/tm3d.json);
 
 [[ -z "$1" ]] && echo "e.g. $0 ~/src/foo/bar/" && exit 1;
 
