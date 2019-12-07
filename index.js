@@ -1,9 +1,10 @@
-import * as THREE from './libs/three.module.js';
+import * as THREE from '/libs/three.module.js';
+import { OrbitControls } from '/libs/three/OrbitControls.js';
 
 const TM3D_URL = '/json/tm3d.json';
 
 let rendering = false;
-let camera, scene, renderer, group;
+let camera, scene, renderer, group, controls;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 
@@ -67,10 +68,22 @@ async function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
-  // document.addEventListener('mousemove', onDocumentMouseMove, false);
-  document.addEventListener('keypress', onKeyPress, false);
   window.addEventListener('resize', onWindowResize, false);
+
+  initControls();
   render();
+}
+
+function initControls() {
+  // https://github.com/mrdoob/three.js/blob/master/examples/misc_controls_orbit.html
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.addEventListener('change', render); // call this only in static scenes (i.e., if there is no animation loop)
+  // controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+  // controls.dampingFactor = 0.05;
+  controls.screenSpacePanning = false;
+  controls.minDistance = 1;
+  controls.maxDistance = 1e4;
+  controls.maxPolarAngle = Math.PI / 2;
 }
 
 let materials = {};
@@ -78,8 +91,8 @@ let materials = {};
 function getMaterial(sb) {
   let material = materials[sb.color] || new THREE.MeshPhongMaterial({
     color: sb.color,
-    opacity: 0.25,
-    transparent: true,
+    opacity: 0.75,
+    transparent: false,
   });
 
   return materials[sb.color] = material;
@@ -96,7 +109,7 @@ function onWindowResize() {
   requestAnimationFrame(render);
 }
 
-function onDocumentMouseMove(event) {
+function onMouseMove(event) {
   let mouseX = (event.clientX - windowHalfX) * 1e-2;
   let mouseY = (event.clientY - windowHalfY) * 1e-2;
   group.rotation.x = Math.sin(mouseX);
@@ -104,28 +117,12 @@ function onDocumentMouseMove(event) {
   requestAnimationFrame(render);
 }
 
-function onKeyPress(event) {
-  switch (event.key) {
-    case 'z':
-      group.rotation.z += 0.01;
-      render();
-      break;
-    case 'y':
-      group.rotation.y += 0.01;
-      render();
-      break;
-    case 'x':
-      group.rotation.x += 0.01;
-      render();
-      break;
-  }
-}
-
 function render() {
   try {
     if (rendering)
       return;
     rendering = true;
+    // controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
     camera.lookAt(scene.position);
     renderer.render(scene, camera);
   } finally {
