@@ -17,7 +17,12 @@ async function init() {
   if (tm3d.type != 'tm3d' || tm3d.version != '1.0.0')
     throw new Error('Invalid TM3D');
 
-  console.log('tm3d', tm3d.boxes.length, 'boxes');
+  let bbox = getBoundaryBox(tm3d);
+  console.log('tm3d', tm3d.boxes.length, 'boxes', bbox);
+
+  let xcenter = (bbox.x[0] + bbox.x[1]) / 2;
+  let ycenter = (bbox.y[0] + bbox.y[1]) / 2;
+  let zcenter = (bbox.z[0] + bbox.z[1]) / 2;
 
   camera = new THREE.PerspectiveCamera(
     60, window.innerWidth / window.innerHeight, 1, 10000);
@@ -44,9 +49,9 @@ async function init() {
     let material = getMaterial(sb);
     let mesh = new THREE.Mesh(geometry, material);
 
-    mesh.position.x = (sb.x[1] + sb.x[0]) / 2 - 200;
-    mesh.position.y = (sb.y[1] + sb.y[0]) / 2 - 200;
-    mesh.position.z = (sb.z[1] + sb.z[0]) / 2;
+    mesh.position.x = (sb.x[1] + sb.x[0]) / 2 - xcenter;
+    mesh.position.y = (sb.y[1] + sb.y[0]) / 2 - ycenter;
+    mesh.position.z = (sb.z[1] + sb.z[0]) / 2 - zcenter;
 
     mesh.matrixAutoUpdate = false;
     mesh.updateMatrix();
@@ -98,6 +103,30 @@ function getMaterial(sb) {
   return materials[sb.color] = material;
 }
 
+function getBoundaryBox(tm3d) {
+  let xmin = +1 / 0;
+  let xmax = -1 / 0;
+  let ymin = +1 / 0;
+  let ymax = -1 / 0;
+  let zmin = +1 / 0;
+  let zmax = -1 / 0;
+
+  for (let sb of tm3d.boxes) {
+    xmin = Math.min(xmin, sb.x[0]);
+    xmax = Math.max(xmax, sb.x[1]);
+    ymin = Math.min(ymin, sb.y[0]);
+    ymax = Math.max(ymax, sb.y[1]);
+    zmin = Math.min(zmin, sb.z[0]);
+    zmax = Math.max(zmax, sb.z[1]);
+  }
+
+  return {
+    x: [xmin, xmax],
+    y: [ymin, ymax],
+    z: [zmin, zmax],
+  };
+}
+
 function onWindowResize() {
   windowHalfX = window.innerWidth / 2;
   windowHalfY = window.innerHeight / 2;
@@ -106,14 +135,6 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
 
   renderer.setSize(window.innerWidth, window.innerHeight);
-  requestAnimationFrame(render);
-}
-
-function onMouseMove(event) {
-  let mouseX = (event.clientX - windowHalfX) * 1e-2;
-  let mouseY = (event.clientY - windowHalfY) * 1e-2;
-  group.rotation.x = Math.sin(mouseX);
-  group.rotation.y = Math.cos(mouseY);
   requestAnimationFrame(render);
 }
 
