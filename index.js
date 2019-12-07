@@ -18,7 +18,7 @@ async function init() {
     throw new Error('Invalid TM3D');
 
   let bbox = getBoundaryBox(tm3d);
-  console.log('tm3d', tm3d.boxes.length, 'boxes', bbox);
+  console.log('tm3d', tm3d.boxes.length, 'boxes', JSON.stringify(bbox));
 
   let xcenter = (bbox.x[0] + bbox.x[1]) / 2;
   let ycenter = (bbox.y[0] + bbox.y[1]) / 2;
@@ -60,14 +60,11 @@ async function init() {
 
   scene.add(group);
 
-  let hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 2);
+  let hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
   hemiLight.color.setHSL(0.6, 1, 0.6);
   hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-  hemiLight.position.set(0, 50, 0);
+  hemiLight.position.set(0, 0, 1e3);
   scene.add(hemiLight);
-
-  let hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
-  scene.add(hemiLightHelper);
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
