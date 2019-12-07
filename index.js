@@ -7,7 +7,7 @@ let mouseX = 0, mouseY = 0;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 
-init().then(render);
+init();
 
 async function init() {
   let resp = await fetch(TM3D_URL);
@@ -18,11 +18,17 @@ async function init() {
 
   camera = new THREE.PerspectiveCamera(
     60, window.innerWidth / window.innerHeight, 1, 10000);
-  camera.position.z = 500;
+  camera.position.x = 2000;
+  camera.position.y = 2000;
+  camera.position.z = 1000;
+  camera.up.set(0, 0, 1);
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
   scene.fog = new THREE.Fog(0xffffff, 1, 10000);
+
+  let xyzAxes = new THREE.AxesHelper(2000);
+  scene.add(xyzAxes);
 
   let material = new THREE.MeshNormalMaterial();
   group = new THREE.Group();
@@ -49,8 +55,9 @@ async function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
-  document.addEventListener('mousemove', onDocumentMouseMove, false);
+  // document.addEventListener('mousemove', onDocumentMouseMove, false);
   window.addEventListener('resize', onWindowResize, false);
+  render();
 }
 
 function onWindowResize() {
@@ -71,20 +78,6 @@ function onDocumentMouseMove(event) {
 }
 
 function render() {
-  let time = 0;
-
-  let rx = Math.sin(time * 0.7) * 0.5,
-    ry = Math.sin(time * 0.3) * 0.5,
-    rz = Math.sin(time * 0.2) * 0.5;
-
-  camera.position.x += (mouseX - camera.position.x) * 0.05;
-  camera.position.y += (-mouseY - camera.position.y) * 0.05;
-
   camera.lookAt(scene.position);
-
-  group.rotation.x = rx;
-  group.rotation.y = ry;
-  group.rotation.z = rz;
-
   renderer.render(scene, camera);
 }
