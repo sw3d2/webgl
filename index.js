@@ -13,7 +13,11 @@ async function init() {
   let resp = await fetch(TM3D_URL);
   let tm3d = await resp.json();
 
-  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
+  if (tm3d.type != 'tm3d' || tm3d.version != '1.0.0')
+    throw new Error('Invalid TM3D');
+
+  camera = new THREE.PerspectiveCamera(
+    60, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.z = 500;
 
   scene = new THREE.Scene();
@@ -23,7 +27,7 @@ async function init() {
   let material = new THREE.MeshNormalMaterial();
   group = new THREE.Group();
 
-  for (let sb of tm3d) {
+  for (let sb of tm3d.boxes) {
     let geometry = new THREE.BoxBufferGeometry(
       sb.x[1] - sb.x[0],
       sb.y[1] - sb.y[0],
