@@ -1,18 +1,24 @@
 import * as THREE from '/libs/three.module.js';
 import { OrbitControls } from '/libs/three/OrbitControls.js';
 
-const TM3D_URL = '/json/tm3d.json';
+const TM3D_URL = location.search.slice(1) || '/json/tm3d.json';
 
 let rendering = false;
 let camera, scene, renderer, group, controls;
-let windowHalfX = window.innerWidth / 2;
-let windowHalfY = window.innerHeight / 2;
 
 init();
 
 async function init() {
   let resp = await fetch(TM3D_URL);
-  let tm3d = await resp.json();
+  let text = await resp.text();
+
+  if (resp.status != 200 || text[0] != '{') {
+    document.body.textContent += resp.status +
+      ' ' + resp.statusText + ' ' + text;
+    return;
+  }
+
+  let tm3d = JSON.parse(text);
 
   if (tm3d.type != 'tm3d' || tm3d.version != '1.0.0')
     throw new Error('Invalid TM3D');
