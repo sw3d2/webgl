@@ -1,7 +1,10 @@
 import * as THREE from '/libs/three.module.js';
 import { OrbitControls } from '/libs/three/OrbitControls.js';
 
-const TM3D_URL = location.search.slice(1) || '/json/tm3d.json';
+const BASE_URL = 'https://api.iswaac.dev:2615/json/';
+const JSON_URL = location.search.slice(1) ?
+  BASE_URL + location.search.slice(1) :
+  '/json/tm3d.json';
 
 let rendering = false;
 let camera, scene, renderer, group, controls;
@@ -9,7 +12,7 @@ let camera, scene, renderer, group, controls;
 init();
 
 async function init() {
-  let resp = await fetch(TM3D_URL);
+  let resp = await fetch(JSON_URL);
   let text = await resp.text();
 
   if (resp.status != 200 || text[0] != '{') {
