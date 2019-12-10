@@ -8,7 +8,5 @@ if [[ $input != "Y" ]]; then exit 0; fi;
 
 mkdir -p $DIR;
 rm -r $DIR/*;
-mkdir -p $DIR/json;
 
 cp -vr index.* libs $DIR/;
-cp -vr json/tm3d.json $DIR/json/;

@@ -2,26 +2,19 @@ import * as THREE from '/libs/three.module.js';
 import { OrbitControls } from '/libs/three/OrbitControls.js';
 
 const BASE_URL = 'https://api.iswaac.dev:2615/json/';
-const JSON_URL = location.search.slice(1) ?
-  BASE_URL + location.search.slice(1) :
-  '/json/tm3d.json';
+// const BASE_URL = 'http://localhost:2615/json/';
+const JSON_SRC = location.search.slice(1) || 'microsoft/typescript';
+const JSON_URL = BASE_URL + JSON_SRC;
+const CHECK_INTERVAL = 3e3;
+const CHECK_TIMEOUT = 60e3;
 
 let rendering = false;
 let camera, scene, renderer, group, controls;
 
-init();
+init().catch(err => writeInfo(err.message));
 
 async function init() {
-  let resp = await fetch(JSON_URL);
-  let text = await resp.text();
-
-  if (resp.status != 200 || text[0] != '{') {
-    document.body.textContent += resp.status +
-      ' ' + resp.statusText + ' ' + text;
-    return;
-  }
-
-  let tm3d = JSON.parse(text);
+  let tm3d = await downloadJson();
 
   if (tm3d.type != 'tm3d' || tm3d.version != '1.0.0')
     throw new Error('Invalid TM3D');
@@ -155,4 +148,36 @@ function render() {
   } finally {
     rendering = false;
   }
+}
+
+function sleep(timeout) {
+  return new Promise(
+    resolve => setTimeout(
+      resolve, timeout));
+}
+
+function writeInfo(text) {
+  document.body.textContent = text;
+}
+
+async function downloadJson() {
+  let time0 = Date.now();
+
+  while (Date.now() < time0 + CHECK_TIMEOUT) {
+    let resp = await fetch(JSON_URL);
+    let info = resp.status + ' ' + resp.statusText;
+
+    if (resp.status >= 400)
+      throw new Error(info + '\n' + await resp.text());
+
+    if (resp.status != 200) {
+      writeInfo(info + '\n' + await resp.text());
+      await sleep(CHECK_INTERVAL);
+      continue;
+    }
+
+    return await resp.json();
+  }
+
+  throw new Error('Timed out');
 }
