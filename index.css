@@ -11,6 +11,16 @@ html, body {
   font-family: monospace;
 }
 
+#scene-target {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  padding: 1em;
+  color: #0f0;
+  background: #000;
+  font-family: monospace;
+}
+
 #scene-info {
   position: fixed;
   right: 0;
