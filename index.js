@@ -78,7 +78,8 @@ async function init() {
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  let rsize = getRenderAreaSize();
+  renderer.setSize(rsize.width, rsize.height);
   document.body.appendChild(renderer.domElement);
   window.addEventListener('resize', onWindowResize, false);
 
@@ -135,13 +136,12 @@ function getBoundaryBox(tm3d) {
 }
 
 function onWindowResize() {
-  windowHalfX = window.innerWidth / 2;
-  windowHalfY = window.innerHeight / 2;
+  let rsize = getRenderAreaSize();
 
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = rsize.width / rsize.height;
   camera.updateProjectionMatrix();
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(rsize.width, rsize.height);
   requestAnimationFrame(render);
 }
 
@@ -177,10 +177,11 @@ function showSceneInfo(tm3d, bbox) {
 }
 
 function showSceneName() {
+  document.title = JSON_SRC + ' - ' + document.title;
   SCENE_NAME_EL.textContent = JSON_SRC;
   SCENE_NAME_EL.onblur = () => {
     let src = SCENE_NAME_EL.textContent.trim();
-    if (src && src != JSON_SRC)
+    if (src != JSON_SRC)
       location.search = '?' + src;
   };
 }
@@ -189,7 +190,7 @@ async function downloadJson() {
   let time0 = Date.now();
 
   while (Date.now() < time0 + CHECK_TIMEOUT) {
-    let resp = await fetch(JSON_URL);
+    let resp = await fetch(JSON_URL.toLowerCase());
     let info = resp.status + ' ' + resp.statusText;
 
     if (resp.status >= 400)
@@ -207,4 +208,10 @@ async function downloadJson() {
   }
 
   throw new Error('Timed out');
+}
+
+function getRenderAreaSize() {
+  let width = document.body.clientWidth;
+  let height = document.body.clientHeight;
+  return { width, height };
 }
