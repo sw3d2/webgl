@@ -1,5 +1,27 @@
 body {
   margin: 0;
+}
+
+#status {
   white-space: pre-wrap;
   font-family: monospace;
+}
+
+#scene-info {
+  position: fixed;
+  right: 0;
+  top: 0;
+  padding: 1em;
+  color: #0f0;
+  font-family: monospace;
+}
+
+#scene-name {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 1em;
+  color: #0f0;
+  font-family: monospace;
+  min-width: 1em;
 }

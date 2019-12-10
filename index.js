@@ -1,26 +1,33 @@
 import * as THREE from '/libs/three.module.js';
 import { OrbitControls } from '/libs/three/OrbitControls.js';
 
-const BASE_URL = 'https://api.iswaac.dev:2615/json/';
-// const BASE_URL = 'http://localhost:2615/json/';
-const JSON_SRC = location.search.slice(1) || 'microsoft/typescript';
+const DEBUG = location.hostname == 'localhost';
+const PROD_BASE_URL = 'https://api.iswaac.dev:2615/json/';
+const TEST_BASE_URL = 'http://localhost:2615/json/';
+const BASE_URL = DEBUG ? TEST_BASE_URL : PROD_BASE_URL;
+const JSON_SRC = location.search.slice(1) || 'microsoft/typescript/src';
 const JSON_URL = BASE_URL + JSON_SRC;
 const CHECK_INTERVAL = 3e3;
 const CHECK_TIMEOUT = 60e3;
+const STATUS_EL = document.querySelector('#status');
+const SCENE_INFO_EL = document.querySelector('#scene-info');
+const SCENE_NAME_EL = document.querySelector('#scene-name');
 
 let rendering = false;
 let camera, scene, renderer, group, controls;
 
-init().catch(err => writeInfo(err.message));
+init().catch(err => showStatus(err.message));
 
 async function init() {
+  showSceneName();
   let tm3d = await downloadJson();
 
   if (tm3d.type != 'tm3d' || tm3d.version != '1.0.0')
     throw new Error('Invalid TM3D');
 
+  showStatus('Creating 3D scene');
   let bbox = getBoundaryBox(tm3d);
-  console.log('tm3d', tm3d.boxes.length, 'boxes', JSON.stringify(bbox));
+  showSceneInfo(tm3d, bbox);
 
   let xcenter = (bbox.x[0] + bbox.x[1]) / 2;
   let ycenter = (bbox.y[0] + bbox.y[1]) / 2;
@@ -67,6 +74,7 @@ async function init() {
   hemiLight.groundColor.setHSL(0.095, 1, 0.75);
   hemiLight.position.set(0, 0, 1e3);
   scene.add(hemiLight);
+  showStatus('');
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -156,8 +164,25 @@ function sleep(timeout) {
       resolve, timeout));
 }
 
-function writeInfo(text) {
-  document.body.textContent = text;
+function showStatus(text) {
+  STATUS_EL.textContent = text;
+}
+
+function showSceneInfo(tm3d, bbox) {
+  let dx = (bbox.x[1] - bbox.x[0]).toFixed(0);
+  let dy = (bbox.y[1] - bbox.y[0]).toFixed(0);
+  let dz = (bbox.z[1] - bbox.z[0]).toFixed(0);
+  let info = `${tm3d.boxes.length} boxes: ${dx}x${dy}x${dz}`;
+  SCENE_INFO_EL.textContent = info;
+}
+
+function showSceneName() {
+  SCENE_NAME_EL.textContent = JSON_SRC;
+  SCENE_NAME_EL.onblur = () => {
+    let src = SCENE_NAME_EL.textContent.trim();
+    if (src && src != JSON_SRC)
+      location.search = '?' + src;
+  };
 }
 
 async function downloadJson() {
@@ -171,7 +196,9 @@ async function downloadJson() {
       throw new Error(info + '\n' + await resp.text());
 
     if (resp.status != 200) {
-      writeInfo(info + '\n' + await resp.text());
+      let text = await resp.text();
+      let time = (Date.now() - time0) / 1e3 | 0;
+      showStatus(info + '\n' + text + '\n' + time);
       await sleep(CHECK_INTERVAL);
       continue;
     }
