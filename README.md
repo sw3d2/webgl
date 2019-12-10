@@ -2,6 +2,10 @@
 
 ![](/pics/vscode.png)
 
+# What's iswaac?
+
+The treemap above looks like a chip, so I came up with the "interactive software visualization as a chip" acronym.
+
 # How it works
 
 ```
@@ -22,3 +26,7 @@
 # Prior Art
 
 [3D Treemaps That Use Extrusion](https://datavizcatalogue.com/blog/3d-treemaps-that-use-extrusion/)
+
+# License
+
+GNU AGPL v3
