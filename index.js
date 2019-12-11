@@ -9,6 +9,9 @@ const JSON_SRC = location.search.slice(1) || 'microsoft/typescript/src';
 const JSON_URL = BASE_URL + JSON_SRC;
 const CHECK_INTERVAL = 3e3;
 const CHECK_TIMEOUT = 60e3;
+const BG_COLOR = 0x000000;
+const SELECTED_COLOR = 0x00FF00;
+const BOX_GAP = 1.5;
 const STATUS_EL = document.querySelector('#status');
 const SCENE_INFO_EL = document.querySelector('#scene-info');
 const SCENE_NAME_EL = document.querySelector('#scene-name');
@@ -18,6 +21,7 @@ let rendering = false;
 let camera, scene, renderer, group, controls;
 let raycaster = new THREE.Raycaster();
 let mouseVector = new THREE.Vector3();
+let selectedTarget, prevSelectedTargetColor;
 
 init().catch(err => showStatus(err.message));
 
@@ -44,7 +48,7 @@ async function init() {
   camera.up.set(0, 0, 1);
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x000000);
+  scene.background = new THREE.Color(BG_COLOR);
   // scene.fog = new THREE.Fog(0xffffff, 1, 10000);
 
   if (DEBUG) {
@@ -55,12 +59,20 @@ async function init() {
   group = new THREE.Group();
 
   for (let sb of tm3d.boxes) {
+    let dx = sb.x[1] - sb.x[0];
+    let dy = sb.y[1] - sb.y[0];
+
     let geometry = new THREE.BoxBufferGeometry(
-      sb.x[1] - sb.x[0],
-      sb.y[1] - sb.y[0],
+      dx > BOX_GAP * 2 ? dx - BOX_GAP : dx,
+      dy > BOX_GAP * 2 ? dy - BOX_GAP : dy,
       sb.z[1] - sb.z[0]);
 
-    let material = getMaterial(sb);
+    let material = new THREE.MeshPhongMaterial({
+      color: sb.color,
+      opacity: 0.75,
+      transparent: false,
+    });
+
     let mesh = new THREE.Mesh(geometry, material);
 
     mesh.position.x = (sb.x[1] + sb.x[0]) / 2 - xcenter;
@@ -105,18 +117,6 @@ function initControls() {
   controls.minDistance = 1;
   controls.maxDistance = 1e4;
   controls.maxPolarAngle = Math.PI / 2;
-}
-
-let materials = {};
-
-function getMaterial(sb) {
-  let material = materials[sb.color] || new THREE.MeshPhongMaterial({
-    color: sb.color,
-    opacity: 0.75,
-    transparent: false,
-  });
-
-  return materials[sb.color] = material;
 }
 
 function getBoundaryBox(tm3d) {
@@ -167,9 +167,23 @@ function onMouseClick(event) {
   raycaster.setFromCamera(mouseVector, camera);
   let intersects = raycaster.intersectObject(group, true);
   let targets = intersects.filter(x => x && x.object);
-  if (!targets.length) return;
-  let target = targets[0];
+
+  if (targets.length > 0) {
+    selectTarget(targets[0]);
+    requestAnimationFrame(render);
+  }
+}
+
+function selectTarget(target) {
+  if (selectedTarget) {
+    selectedTarget.object.material.color.setHex(prevSelectedTargetColor);
+    selectedTarget = null;
+  }
+
   SCENE_TARGET_EL.textContent = target.object.userData.label;
+  prevSelectedTargetColor = target.object.material.color.getHex();
+  target.object.material.color.setHex(SELECTED_COLOR);
+  selectedTarget = target;
 }
 
 function getCoordinates(event) {

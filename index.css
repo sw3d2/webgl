@@ -14,10 +14,10 @@ html, body {
 #github {
   position: fixed;
   left: 0;
-  top: 0;
-  padding: 1em;
+  bottom: 0;
   color: #0f0;
   font-family: monospace;
+  font-size: 6pt;
 }
 
 #scene-target {
