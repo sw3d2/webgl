@@ -67,10 +67,8 @@ async function init() {
       dy > BOX_GAP * 2 ? dy - BOX_GAP : dy,
       sb.z[1] - sb.z[0]);
 
-    let material = new THREE.MeshPhongMaterial({
+    let material = new THREE.MeshLambertMaterial({
       color: sb.color,
-      opacity: 0.75,
-      transparent: false,
     });
 
     let mesh = new THREE.Mesh(geometry, material);
@@ -87,13 +85,15 @@ async function init() {
 
   scene.add(group);
 
-  addHemiLight(1e3, 0, 1e3);
-  addHemiLight(0, 1e3, 1e3);
+  addLightSource(1e3, 0, 1e3);
+  addLightSource(0, 1e3, 1e3);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.1));
 
   showStatus('');
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
+  
   let rsize = getRenderAreaSize();
   renderer.setSize(rsize.width, rsize.height);
   document.body.appendChild(renderer.domElement);
@@ -105,12 +105,10 @@ async function init() {
   render();
 }
 
-function addHemiLight(x, y, z) {
-  let hemiLight = new THREE.HemisphereLight(0, 0, 0.75);
-  hemiLight.color.setHSL(0.6, 1, 0.6);
-  hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-  hemiLight.position.set(x, y, z);
-  scene.add(hemiLight);
+function addLightSource(x, y, z) {
+  let light = new THREE.PointLight(0xFFFFFF, 0.5, 1e4);
+  light.position.set(x, y, z);
+  scene.add(light);
 }
 
 function initControls() {
