@@ -87,11 +87,9 @@ async function init() {
 
   scene.add(group);
 
-  let hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
-  hemiLight.color.setHSL(0.6, 1, 0.6);
-  hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-  hemiLight.position.set(0, 0, 1e3);
-  scene.add(hemiLight);
+  addHemiLight(1e3, 0, 1e3);
+  addHemiLight(0, 1e3, 1e3);
+
   showStatus('');
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -105,6 +103,14 @@ async function init() {
 
   initControls();
   render();
+}
+
+function addHemiLight(x, y, z) {
+  let hemiLight = new THREE.HemisphereLight(0, 0, 0.75);
+  hemiLight.color.setHSL(0.6, 1, 0.6);
+  hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+  hemiLight.position.set(x, y, z);
+  scene.add(hemiLight);
 }
 
 function initControls() {
