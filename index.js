@@ -69,6 +69,8 @@ async function init() {
 
     let material = new THREE.MeshLambertMaterial({
       color: sb.color,
+      opacity: 0.5,
+      transparent: !sb.label,
     });
 
     let mesh = new THREE.Mesh(geometry, material);
