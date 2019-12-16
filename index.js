@@ -12,12 +12,16 @@ const CHECK_TIMEOUT = 60e3;
 const BG_COLOR = 0x000000;
 const SELECTED_COLOR = 0x00FF00;
 const BOX_GAP = 1.5;
+const MAX_AST_DEPTH = 100;
+const BOX_HEIGHT = 10;
+const RENDER_TIME_THRS = 100;
 const STATUS_EL = document.querySelector('#status');
 const SCENE_INFO_EL = document.querySelector('#scene-info');
 const SCENE_NAME_EL = document.querySelector('#scene-name');
 const SCENE_TARGET_EL = document.querySelector('#scene-target');
 
 let rendering = false;
+let tm3d;
 let camera, scene, renderer, group, controls;
 let raycaster = new THREE.Raycaster();
 let mouseVector = new THREE.Vector3();
@@ -27,14 +31,16 @@ init().catch(err => showStatus(err.message));
 
 async function init() {
   showSceneName();
-  let tm3d = await downloadJson();
+  tm3d = await downloadJson();
 
   if (tm3d.type != 'tm3d' || tm3d.version != '1.0.0')
     throw new Error('Invalid TM3D');
 
   showStatus('Creating 3D scene');
+  let time1 = Date.now();
   let bbox = getBoundaryBox(tm3d);
   showSceneInfo(tm3d, bbox);
+  await sleep(0);
 
   let xcenter = (bbox.x[0] + bbox.x[1]) / 2;
   let ycenter = (bbox.y[0] + bbox.y[1]) / 2;
@@ -65,19 +71,17 @@ async function init() {
     let geometry = new THREE.BoxBufferGeometry(
       dx > BOX_GAP * 2 ? dx - BOX_GAP : dx,
       dy > BOX_GAP * 2 ? dy - BOX_GAP : dy,
-      sb.z[1] - sb.z[0]);
+      (sb.z[1] - sb.z[0]) * BOX_HEIGHT);
 
     let material = new THREE.MeshLambertMaterial({
       color: sb.color,
-      opacity: 0.5,
-      transparent: !sb.label,
     });
 
     let mesh = new THREE.Mesh(geometry, material);
 
     mesh.position.x = (sb.x[1] + sb.x[0]) / 2 - xcenter;
     mesh.position.y = (sb.y[1] + sb.y[0]) / 2 - ycenter;
-    mesh.position.z = (sb.z[1] + sb.z[0]) / 2 - zcenter;
+    mesh.position.z = ((sb.z[1] + sb.z[0]) / 2 - zcenter) * BOX_HEIGHT;
 
     mesh.matrixAutoUpdate = false;
     mesh.updateMatrix();
@@ -91,19 +95,26 @@ async function init() {
   addLightSource(0, 1e3, 1e3);
   scene.add(new THREE.AmbientLight(0xffffff, 0.1));
 
-  showStatus('');
+  let time2 = Date.now();
+  console.log('Scene created in', time2 - time1, 'ms');
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
-  
+
   let rsize = getRenderAreaSize();
   renderer.setSize(rsize.width, rsize.height);
   document.body.appendChild(renderer.domElement);
+  showStatus(null);
+  await sleep(0);
+
   window.addEventListener('resize', onWindowResize, false);
   renderer.domElement.addEventListener('click', onMouseClick, false);
   renderer.domElement.addEventListener('touchstart', onMouseClick, false);
 
   initControls();
+  let time3 = Date.now();
+  console.log('WebGL initialized in', time3 - time2, 'ms');
+
   render();
 }
 
@@ -186,10 +197,36 @@ function selectTarget(target) {
     selectedTarget = null;
   }
 
-  SCENE_TARGET_EL.textContent = target.object.userData.label;
+  showSelectedTargetInfo(target.object.userData);
   prevSelectedTargetColor = target.object.material.color.getHex();
   target.object.material.color.setHex(SELECTED_COLOR);
   selectedTarget = target;
+}
+
+function showSelectedTargetInfo(userData) {
+  let chain = [];
+
+  for (let data = userData; data && chain.length < MAX_AST_DEPTH;) {
+    chain.push(data);
+    let pid = data.parent;
+    if (!pid) break;
+    data = tm3d.boxes[pid - 1];
+
+    if (!data) {
+      console.warn('Invalid node id:', pid);
+      break;
+    }
+
+    if (data.id != pid) {
+      console.error('Mismatching node id:', pid);
+      break;
+    }
+  }
+
+  SCENE_TARGET_EL.textContent = chain.reverse()
+    .map(node => node.label)
+    .filter(label => !!label)
+    .join('/');
 }
 
 function getCoordinates(event) {
@@ -212,9 +249,13 @@ function render() {
     if (rendering)
       return;
     rendering = true;
+    let time0 = Date.now();
     // controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
     camera.lookAt(scene.position);
     renderer.render(scene, camera);
+    let time1 = Date.now();
+    if (time1 - time0 > RENDER_TIME_THRS)
+      console.warn('rendered in', time1 - time0, 'ms');
   } finally {
     rendering = false;
   }
@@ -227,7 +268,8 @@ function sleep(timeout) {
 }
 
 function showStatus(text) {
-  STATUS_EL.textContent = text;
+  STATUS_EL.textContent = text || '';
+  STATUS_EL.style.display = text ? '' : 'none';
 }
 
 function showSceneInfo(tm3d, bbox) {
@@ -261,7 +303,7 @@ async function downloadJson() {
     if (resp.status != 200) {
       let text = await resp.text();
       let time = (Date.now() - time0) / 1e3 | 0;
-      showStatus(info + '\n' + text + '\n' + time);
+      showStatus(info + '\n' + text + '\n' + time + ' sec');
       await sleep(CHECK_INTERVAL);
       continue;
     }

@@ -9,25 +9,28 @@ html, body {
 #status {
   white-space: pre-wrap;
   font-family: monospace;
+  margin-top: 5em;
 }
 
 #github {
   position: fixed;
-  left: 0;
-  bottom: 0;
+  right: 0;
+  top: 0;
   color: #0f0;
   font-family: monospace;
-  font-size: 6pt;
+  font-size: 5pt;
 }
 
 #scene-target {
   position: fixed;
-  right: 0;
+  left: 0;
   bottom: 0;
   padding: 1em;
   color: #0f0;
   background: #000;
   font-family: monospace;
+  word-wrap: break-word;
+  word-break: break-all;
 }
 
 #scene-info {
@@ -43,7 +46,7 @@ html, body {
 #scene-name {
   position: fixed;
   left: 0;
-  bottom: 0;
+  top: 0;
   padding: 1em;
   color: #0f0;
   background: #000;
