@@ -5,7 +5,7 @@ const DEBUG = location.hostname == 'localhost';
 const PROD_BASE_URL = 'https://api.iswaac.dev:2615/json/';
 const TEST_BASE_URL = 'http://localhost:2615/json/';
 const BASE_URL = DEBUG ? TEST_BASE_URL : PROD_BASE_URL;
-const JSON_SRC = location.search.slice(1) || 'microsoft/typescript/src';
+const JSON_SRC = location.search.slice(1) || 'babel/babel';
 const JSON_URL = BASE_URL + JSON_SRC;
 const CHECK_INTERVAL = 3e3;
 const CHECK_TIMEOUT = 60e3;
