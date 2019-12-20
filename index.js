@@ -11,7 +11,7 @@ const CHECK_INTERVAL = 3e3;
 const CHECK_TIMEOUT = 60e3;
 const BG_COLOR = 0x000000;
 const SELECTED_COLOR = 0x00FF00;
-const BOX_GAP = 1.5;
+const BOX_GAP = 0.85;
 const MAX_AST_DEPTH = 100;
 const BOX_HEIGHT = 10;
 const RENDER_TIME_THRS = 100;
@@ -69,9 +69,9 @@ async function init() {
     let dy = sb.y[1] - sb.y[0];
 
     let geometry = new THREE.BoxBufferGeometry(
-      dx > BOX_GAP * 2 ? dx - BOX_GAP : dx,
-      dy > BOX_GAP * 2 ? dy - BOX_GAP : dy,
-      (sb.z[1] - sb.z[0]) * BOX_HEIGHT);
+      dx * BOX_GAP,
+      dy * BOX_GAP,
+      (sb.z[1] - sb.z[0]) * BOX_HEIGHT * BOX_GAP);
 
     let material = new THREE.MeshLambertMaterial({
       color: sb.color,
