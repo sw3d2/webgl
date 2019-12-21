@@ -15,7 +15,8 @@ const CHECK_INTERVAL = 3e3;
 const CHECK_TIMEOUT = 60e3;
 const BG_COLOR = 0x000000;
 const SELECTED_COLOR = 0x00FF00;
-const BOX_GAP = 0.85;
+const SHOW_NODE_REF = true;
+const BOX_GAP = 0.9;
 const MAX_AST_DEPTH = 100;
 const BOX_HEIGHT = 10;
 const RENDER_TIME_THRS = 100;
@@ -207,10 +208,13 @@ function selectTarget(target) {
   selectedTarget = target;
 }
 
-function showSelectedTargetInfo(userData) {
+function getSelectedTargetInfo(userData) {
   let chain = [];
 
   for (let data = userData; data && chain.length < MAX_AST_DEPTH;) {
+    if (SHOW_NODE_REF && data.ref)
+      return data.ref;
+
     chain.push(data);
     let pid = data.parent;
     if (!pid) break;
@@ -227,10 +231,15 @@ function showSelectedTargetInfo(userData) {
     }
   }
 
-  SCENE_TARGET_EL.textContent = chain.reverse()
+  return chain.reverse()
     .map(node => node.label)
     .filter(label => !!label)
     .join('/');
+}
+
+function showSelectedTargetInfo(userData) {
+  SCENE_TARGET_EL.textContent =
+    getSelectedTargetInfo(userData);
 }
 
 function getCoordinates(event) {
