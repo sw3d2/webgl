@@ -54,7 +54,7 @@ html, body {
   min-width: 1em;
 }
 
-#scene-name::before {
-  content: 'github.com/';
-  color: #080;
+#scene-name:empty::before {
+  content: 'e.g. github:babel/babel';
+  color: #444;
 }
