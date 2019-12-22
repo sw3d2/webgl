@@ -8,4 +8,10 @@ read -r -p "Publish to $DIR? [Y/n] " input;
 if [[ $input != "Y" ]]; then exit 0; fi;
 
 mkdir -p $DIR;
-cp -vr index.* libs tsbin $DIR/;
+cp -vr \
+  index.* \
+  libs \
+  tsc-bin \
+  node_modules/three/build \
+  node_modules/three/examples/jsm/controls \
+  $DIR/;

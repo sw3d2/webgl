@@ -1,5 +1,8 @@
-import * as THREE from '/libs/three.module.js';
-import { OrbitControls } from '/libs/three/OrbitControls.js';
+import * as THREE_DTS from 'three';
+import * as THREE_JS from '/node_modules/three/build/three.module.js';
+import { OrbitControls } from '/node_modules/three/examples/jsm/controls/OrbitControls.js';
+
+const THREE: typeof THREE_DTS = THREE_JS;
 
 const DEBUG = location.hostname == 'localhost';
 const PROD_BASE_URL = 'https://api.iswaac.dev:2615/json/';

@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "three": "0.111.0"
+  },
   "devDependencies": {
     "typescript": "3.7.3"
   }
