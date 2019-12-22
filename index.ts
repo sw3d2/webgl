@@ -23,6 +23,7 @@ const BOX_GAP = 0.9;
 const MAX_AST_DEPTH = 100;
 const BOX_HEIGHT = 10;
 const RENDER_TIME_THRS = 100;
+const WEBGL_VERSION = 'webgl2';
 const STATUS_EL = document.querySelector('#status')! as HTMLElement;
 const SCENE_INFO_EL = document.querySelector('#scene-info')! as HTMLElement;
 const SCENE_NAME_EL = document.querySelector('#scene-name')! as HTMLElement;
@@ -58,7 +59,7 @@ let group: Three.Group;
 let controls;
 let raycaster = new THREE.Raycaster();
 let mouseVector = new THREE.Vector3();
-let materials = new Map<string, Three.MeshLambertMaterial>();
+let materials = new Map<string, Three.Material>();
 let currentTarget: TreemapMesh | null;
 
 init().catch(err => showStatus(err.message));
@@ -129,7 +130,15 @@ async function init() {
   let time2 = Date.now();
   console.log('Scene created in', time2 - time1, 'ms');
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  let canvas = document.createElement('canvas');
+  let context = canvas.getContext(WEBGL_VERSION, { alpha: false })!;
+
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    context,
+    antialias: true,
+  });
+
   renderer.setPixelRatio(window.devicePixelRatio);
 
   let rsize = getRenderAreaSize();
