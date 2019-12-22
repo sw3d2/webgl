@@ -20,10 +20,17 @@ const BOX_GAP = 0.9;
 const MAX_AST_DEPTH = 100;
 const BOX_HEIGHT = 10;
 const RENDER_TIME_THRS = 100;
-const STATUS_EL = document.querySelector('#status');
-const SCENE_INFO_EL = document.querySelector('#scene-info');
-const SCENE_NAME_EL = document.querySelector('#scene-name');
-const SCENE_TARGET_EL = document.querySelector('#scene-target');
+const STATUS_EL = document.querySelector('#status')! as HTMLElement;
+const SCENE_INFO_EL = document.querySelector('#scene-info')! as HTMLElement;
+const SCENE_NAME_EL = document.querySelector('#scene-name')! as HTMLElement;
+const SCENE_TARGET_EL = document.querySelector('#scene-target')! as HTMLElement;
+
+interface TreeNodeData {
+  id: number;
+  parent: number;
+  label?: string;
+  ref?: string;
+}
 
 let rendering = false;
 let tm3d;
@@ -211,8 +218,8 @@ function selectTarget(target) {
   selectedTarget = target;
 }
 
-function getSelectedTargetInfo(userData) {
-  let chain = [];
+function getSelectedTargetInfo(userData: TreeNodeData) {
+  let chain: TreeNodeData[] = [];
 
   for (let data = userData; data && chain.length < MAX_AST_DEPTH;) {
     if (SHOW_NODE_REF && data.ref)
@@ -300,7 +307,7 @@ function showSceneName() {
   document.title = JSON_SRC + ' - ' + document.title;
   SCENE_NAME_EL.textContent = JSON_SRC;
   SCENE_NAME_EL.onblur = () => {
-    let src = SCENE_NAME_EL.textContent.trim();
+    let src = SCENE_NAME_EL.textContent?.trim();
     if (src != JSON_SRC)
       location.search = '?' + guessFullDataSrc(src);
   };

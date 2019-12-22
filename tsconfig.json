@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "outDir": "tsc-bin",
+    "module": "ES6",
+    "baseUrl": ".",
+    "paths": {
+      "/*": ["./*"]
+    },
+
+    "target": "ES2019",
+    "lib": [ "ES2019", "DOM" ],
+    "alwaysStrict": true,
+    "strictNullChecks": true,
+    "removeComments": false,
+    "noImplicitAny": false
+  }
+}

@@ -1,4 +1,5 @@
 #!/bin/bash
+sh/make;
 
 DIR=${1:-".web"}
 DIR=$(realpath "$DIR");
@@ -7,4 +8,4 @@ read -r -p "Publish to $DIR? [Y/n] " input;
 if [[ $input != "Y" ]]; then exit 0; fi;
 
 mkdir -p $DIR;
-cp -vr index.* libs $DIR/;
+cp -vr index.* libs tsbin $DIR/;
