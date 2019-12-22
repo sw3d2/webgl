@@ -28,15 +28,29 @@ const SCENE_INFO_EL = document.querySelector('#scene-info')! as HTMLElement;
 const SCENE_NAME_EL = document.querySelector('#scene-name')! as HTMLElement;
 const SCENE_TARGET_EL = document.querySelector('#scene-target')! as HTMLElement;
 
-interface TreeNodeData {
+interface TreemapFile {
+  type: string;
+  version: string;
+  boxes: TreemapNode[];
+}
+
+interface TreemapNode {
   id: number;
   parent: number;
   label?: string;
   ref?: string;
+  color?: string;
+  x: [number, number];
+  y: [number, number];
+  z: [number, number];
+}
+
+interface TreemapMesh extends Three.Mesh {
+  userData: TreemapNode;
 }
 
 let rendering = false;
-let tm3d;
+let tm3d: TreemapFile;
 let camera: Three.PerspectiveCamera;
 let scene: Three.Scene;
 let renderer: Three.WebGLRenderer;
@@ -44,7 +58,8 @@ let group: Three.Group;
 let controls;
 let raycaster = new THREE.Raycaster();
 let mouseVector = new THREE.Vector3();
-let selectedTarget, prevSelectedTargetColor;
+let materials = new Map<string, Three.MeshLambertMaterial>();
+let currentTarget: TreemapMesh | null;
 
 init().catch(err => showStatus(err.message));
 
@@ -92,10 +107,7 @@ async function init() {
       dy * BOX_GAP,
       (sb.z[1] - sb.z[0]) * BOX_HEIGHT * BOX_GAP);
 
-    let material = new THREE.MeshLambertMaterial({
-      color: sb.color,
-    });
-
+    let material = getBoxMaterial(sb);
     let mesh = new THREE.Mesh(geometry, material);
 
     mesh.position.x = (sb.x[1] + sb.x[0]) / 2 - xcenter;
@@ -138,6 +150,16 @@ async function init() {
 
   let time4 = Date.now();
   showSceneInfo(tm3d, bbox, time4 - time1);
+}
+
+function getBoxMaterial(sb: TreemapNode) {
+  let material = materials.get(sb.color || '') ||
+    new THREE.MeshLambertMaterial({
+      color: sb.color,
+    });
+
+  materials.set(sb.color || '', material);
+  return material;
 }
 
 function addLightSource(x, y, z) {
@@ -208,25 +230,27 @@ function onMouseClick(event) {
   let targets = intersects.filter(x => x && x.object);
 
   if (targets.length > 0) {
-    selectTarget(targets[0]);
+    selectTarget(targets[0].object as TreemapMesh);
     requestAnimationFrame(render);
   }
 }
 
-function selectTarget(target) {
-  if (selectedTarget) {
-    selectedTarget.object.material.color.setHex(prevSelectedTargetColor);
-    selectedTarget = null;
+function selectTarget(target: TreemapMesh) {
+  if (currentTarget) {
+    currentTarget.material =
+      getBoxMaterial(currentTarget.userData);
+    currentTarget = null;
   }
 
-  showSelectedTargetInfo(target.object.userData);
-  prevSelectedTargetColor = target.object.material.color.getHex();
-  target.object.material.color.setHex(SELECTED_COLOR);
-  selectedTarget = target;
+  showSelectedTargetInfo(target.userData);
+  target.material = new THREE.MeshLambertMaterial({
+    color: SELECTED_COLOR,
+  });
+  currentTarget = target;
 }
 
-function getSelectedTargetInfo(userData: TreeNodeData) {
-  let chain: TreeNodeData[] = [];
+function getSelectedTargetInfo(userData: TreemapNode) {
+  let chain: TreemapNode[] = [];
 
   for (let data = userData; data && chain.length < MAX_AST_DEPTH;) {
     if (SHOW_NODE_REF && data.ref)
