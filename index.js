@@ -121,6 +121,9 @@ async function init() {
   console.log('WebGL initialized in', time3 - time2, 'ms');
 
   render();
+
+  let time4 = Date.now();
+  showSceneInfo(tm3d, bbox, time4 - time1);
 }
 
 function addLightSource(x, y, z) {
@@ -285,11 +288,11 @@ function showStatus(text) {
   STATUS_EL.style.display = text ? '' : 'none';
 }
 
-function showSceneInfo(tm3d, bbox) {
+function showSceneInfo(tm3d, bbox, time = 0) {
   let dx = (bbox.x[1] - bbox.x[0]).toFixed(0);
   let dy = (bbox.y[1] - bbox.y[0]).toFixed(0);
   let dz = (bbox.z[1] - bbox.z[0]).toFixed(0);
-  let info = `${tm3d.boxes.length} boxes: ${dx}x${dy}x${dz}`;
+  let info = `${tm3d.boxes.length} boxes; ${time} ms; ${dx}x${dy}x${dz}`;
   SCENE_INFO_EL.textContent = info;
 }
 
