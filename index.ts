@@ -1,8 +1,8 @@
-import * as THREE_DTS from 'three';
+import * as Three from 'three';
 import * as THREE_JS from '/node_modules/three/build/three.module.js';
 import { OrbitControls } from '/node_modules/three/examples/jsm/controls/OrbitControls.js';
 
-const THREE: typeof THREE_DTS = THREE_JS;
+const THREE: typeof Three = THREE_JS;
 
 const DEBUG = location.hostname == 'localhost';
 const PROD_BASE_URL = 'https://api.iswaac.dev:2615/json/';
@@ -37,7 +37,11 @@ interface TreeNodeData {
 
 let rendering = false;
 let tm3d;
-let camera, scene, renderer, group, controls;
+let camera: Three.PerspectiveCamera;
+let scene: Three.Scene;
+let renderer: Three.WebGLRenderer;
+let group: Three.Group;
+let controls;
 let raycaster = new THREE.Raycaster();
 let mouseVector = new THREE.Vector3();
 let selectedTarget, prevSelectedTargetColor;
