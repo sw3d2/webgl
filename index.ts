@@ -1,8 +1,12 @@
 import * as Three from 'three';
 import * as THREE_JS from '/node_modules/three/build/three.module.js';
+import * as OrbitControlsType from 'three/examples/jsm/controls/OrbitControls';
 import { OrbitControls } from '/node_modules/three/examples/jsm/controls/OrbitControls.js';
 
 const THREE: typeof Three = THREE_JS;
+
+window['THREE'] = THREE;
+window['render'] = render;
 
 const DEBUG = location.hostname == 'localhost';
 const PROD_BASE_URL = 'https://api.iswaac.dev:2615/json/';
@@ -56,7 +60,7 @@ let camera: Three.PerspectiveCamera;
 let scene: Three.Scene;
 let renderer: Three.WebGLRenderer;
 let group: Three.Group;
-let controls;
+let controls: OrbitControlsType.OrbitControls;
 let raycaster = new THREE.Raycaster();
 let mouseVector = new THREE.Vector3();
 let materials = new Map<string, Three.Material>();
@@ -87,6 +91,8 @@ async function init() {
   camera.position.y = 1000;
   camera.position.z = 500;
   camera.up.set(0, 0, 1);
+
+  window['camera'] = camera;
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(BG_COLOR);
