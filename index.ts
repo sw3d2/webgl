@@ -1,9 +1,5 @@
-import * as Three from 'three';
-import * as THREE_JS from '/node_modules/three/build/three.module.js';
-import * as OrbitControlsType from 'three/examples/jsm/controls/OrbitControls';
-import { OrbitControls } from '/node_modules/three/examples/jsm/controls/OrbitControls.js';
-
-const THREE: typeof Three = THREE_JS;
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 window['THREE'] = THREE;
 window['render'] = render;
@@ -50,20 +46,20 @@ interface TreemapNode {
   z: [number, number];
 }
 
-interface TreemapMesh extends Three.Mesh {
+interface TreemapMesh extends THREE.Mesh {
   userData: TreemapNode;
 }
 
 let rendering = false;
 let tm3d: TreemapFile;
-let camera: Three.PerspectiveCamera;
-let scene: Three.Scene;
-let renderer: Three.WebGLRenderer;
-let group: Three.Group;
-let controls: OrbitControlsType.OrbitControls;
+let camera: THREE.PerspectiveCamera;
+let scene: THREE.Scene;
+let renderer: THREE.WebGLRenderer;
+let group: THREE.Group;
+let controls: OrbitControls;
 let raycaster = new THREE.Raycaster();
 let mouseVector = new THREE.Vector3();
-let materials = new Map<string, Three.Material>();
+let materials = new Map<string, THREE.Material>();
 let currentTarget: TreemapMesh | null;
 
 init().catch(err => showStatus(err.message));
